@@ -10,7 +10,7 @@
 
 Summary:         Simple utility for counting unique lines
 Name:            uc
-Version:         0.0.1
+Version:         0.0.2
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -57,5 +57,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Fri Jan 31 2020 Anton Novojilov <andy@essentialkaos.com> - 0.0.2-0
+- Added option -m/--max for defining maximum unique lines to process
+- Added option -d/--dist for printing data distribution
+
 * Thu Jan 30 2020 Anton Novojilov <andy@essentialkaos.com> - 0.0.1-0
 - Initial build
