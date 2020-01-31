@@ -13,6 +13,7 @@ import (
 	"hash/crc64"
 	"os"
 	"runtime"
+	"sort"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	"pkg.re/essentialkaos/ek.v11/fsutil"
 	"pkg.re/essentialkaos/ek.v11/options"
 	"pkg.re/essentialkaos/ek.v11/signal"
+	"pkg.re/essentialkaos/ek.v11/strutil"
 	"pkg.re/essentialkaos/ek.v11/usage"
 	"pkg.re/essentialkaos/ek.v11/usage/completion/bash"
 	"pkg.re/essentialkaos/ek.v11/usage/completion/fish"
@@ -33,24 +35,28 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "0.0.1"
+	VER  = "0.0.2"
 	DESC = "Tool for counting unique lines"
 )
 
 // Constants with options names
 const (
-	OPT_NO_PROGRESS = "np:no-progress"
-	OPT_NO_COLOR    = "nc:no-color"
-	OPT_HELP        = "h:help"
-	OPT_VER         = "v:version"
+	OPT_MAX_LINES    = "m:max"
+	OPT_DISTRIBUTION = "d:dist"
+	OPT_NO_PROGRESS  = "np:no-progress"
+	OPT_NO_COLOR     = "nc:no-color"
+	OPT_HELP         = "h:help"
+	OPT_VER          = "v:version"
 
 	OPT_COMPLETION = "completion"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Stats contains data info
 type Stats struct {
-	Data           map[uint64]uint32
+	Counters       map[uint64]uint32 // crc64 → num
+	Samples        map[uint64]string // crc64 → sample (512 symbols)
 	LastReadLines  uint64
 	LastReadBytes  float64
 	TotalReadLines uint64
@@ -63,12 +69,30 @@ type Stats struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// LineInfo is struct with line info
+type LineInfo struct {
+	CRC uint64
+	Num uint32
+}
+
+type linesSlice []LineInfo
+
+func (s linesSlice) Len() int      { return len(s) }
+func (s linesSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s linesSlice) Less(i, j int) bool {
+	return s[i].Num < s[j].Num
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // optMap is map with options
 var optMap = options.Map{
-	OPT_NO_PROGRESS: {Type: options.BOOL},
-	OPT_NO_COLOR:    {Type: options.BOOL},
-	OPT_HELP:        {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:         {Type: options.BOOL, Alias: "ver"},
+	OPT_MAX_LINES:    {Type: options.INT},
+	OPT_DISTRIBUTION: {Type: options.BOOL},
+	OPT_NO_PROGRESS:  {Type: options.BOOL},
+	OPT_NO_COLOR:     {Type: options.BOOL},
+	OPT_HELP:         {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:          {Type: options.BOOL, Alias: "ver"},
 
 	OPT_COMPLETION: {},
 }
@@ -142,8 +166,8 @@ func processData(input string) {
 	var r *bufio.Reader
 
 	stats = &Stats{
-		Data: make(map[uint64]uint32),
-		mx:   &sync.Mutex{},
+		Counters: make(map[uint64]uint32),
+		mx:       &sync.Mutex{},
 	}
 
 	if input == "-" {
@@ -165,6 +189,12 @@ func processData(input string) {
 // readData reads data
 func readData(s *bufio.Scanner) {
 	ct := crc64.MakeTable(crc64.ECMA)
+	dist := options.GetB(OPT_DISTRIBUTION)
+	maxLines := options.GetI(OPT_MAX_LINES)
+
+	if dist {
+		stats.Samples = make(map[uint64]string)
+	}
 
 	stats.LastReadDate = time.Now()
 
@@ -174,12 +204,30 @@ func readData(s *bufio.Scanner) {
 
 	for s.Scan() {
 		data := s.Bytes()
+		dataLen := float64(len(data))
+		dataCrc := crc64.Checksum(data, ct)
 
 		stats.mx.Lock()
 
-		stats.Data[crc64.Checksum(data, ct)]++
-		stats.LastReadBytes += float64(len(data))
+		stats.Counters[dataCrc]++
+		stats.LastReadBytes += dataLen
 		stats.LastReadLines++
+
+		stats.TotalReadLines++
+		stats.TotalReadBytes += dataLen
+
+		if dist {
+			_, exist := stats.Samples[dataCrc]
+
+			if !exist {
+				stats.Samples[dataCrc] = strutil.Substr(string(data), 0, 512)
+			}
+		}
+
+		if maxLines > 0 && len(stats.Counters) == maxLines {
+			stats.mx.Unlock()
+			break
+		}
 
 		stats.mx.Unlock()
 	}
@@ -199,9 +247,6 @@ func printProgress() {
 		now := time.Now()
 		dur := now.Sub(stats.LastReadDate)
 		readSpeed := stats.LastReadBytes / dur.Seconds()
-
-		stats.TotalReadLines += stats.LastReadLines
-		stats.TotalReadBytes += stats.LastReadBytes
 
 		fmtc.TPrintf(
 			"{s}%12s/s {s-}|{s} %-12s {s-}|{s} %12s/s {s-}|{s} %-12s{!}",
@@ -225,9 +270,28 @@ func printResults() {
 
 	stats.Finished = true
 
-	fmtc.TPrintln(len(stats.Data))
+	if options.GetB(OPT_DISTRIBUTION) {
+		printDistribution()
+	} else {
+		fmtc.TPrintln(len(stats.Counters))
+	}
 
 	stats.mx.Unlock()
+}
+
+// printDistribution prints distrubution info
+func printDistribution() {
+	var distData linesSlice
+
+	for crc, num := range stats.Counters {
+		distData = append(distData, LineInfo{crc, num})
+	}
+
+	sort.Sort(sort.Reverse(distData))
+
+	for _, info := range distData {
+		fmtc.TPrintf(" %7d %s\n", info.Num, stats.Samples[info.CRC])
+	}
 }
 
 // signalHandler is signal handler
@@ -252,12 +316,16 @@ func showUsage() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo(APP, "file")
 
+	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line")
+	info.AddOption(OPT_MAX_LINES, "Max number of unique lines {s-}(default: 5000){!}", "num")
+	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 
 	info.AddExample("file.txt", "Count unique lines in file.txt")
+	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddRawExample(
 		"cat file.txt | "+APP+" -",
 		"Count unique lines in stdin data",
