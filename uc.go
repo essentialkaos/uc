@@ -53,6 +53,11 @@ const (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// MAX_SAMPLE_SIZE is maximum sample size
+const MAX_SAMPLE_SIZE = 512
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Stats contains data info
 type Stats struct {
 	Counters       map[uint64]uint32 // crc64 → num
@@ -220,7 +225,7 @@ func readData(s *bufio.Scanner) {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = strutil.Substr(string(data), 0, 512)
+				stats.Samples[dataCrc] = strutil.Substr(string(data), 0, MAX_SAMPLE_SIZE)
 			}
 		}
 
