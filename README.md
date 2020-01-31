@@ -90,6 +90,9 @@ Usage: uc {options} file
 
 Options
 
+  --dist, -d            Show number of occurrences for every line
+  --max, -m num         Max number of unique lines (default: 5000)
+  --no-progress, -np    Disable progress output
   --no-progress, -np    Disable progress output
   --no-color, -nc       Disable colors in output
   --help, -h            Show this help message
@@ -99,6 +102,9 @@ Examples
 
   uc file.txt
   Count unique lines in file.txt
+
+  uc -d file.txt
+  Show distribution for file.txt
 
   cat file.txt | uc -
   Count unique lines in stdin data
