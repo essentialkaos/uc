@@ -9,6 +9,8 @@
 
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
+<br/>
+
 `uc` is a simple utility for counting unique lines.
 
 ### Usage demo
@@ -25,7 +27,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `uc` from scratch, make sure you have a working Go 1.11+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go 1.12+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/uc
@@ -37,19 +39,11 @@ If you want to update `uc` to latest stable release, do:
 go get -u github.com/essentialkaos/uc
 ```
 
-#### From ESSENTIAL KAOS Public repo for RHEL6/CentOS6
+#### From [ESSENTIAL KAOS Public Repository](https://yum.kaos.st)
 
-```
-[sudo] yum install -y https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm
-[sudo] yum install uc
-```
-
-
-#### From ESSENTIAL KAOS Public repo for RHEL7/CentOS7
-
-```
-[sudo] yum install -y https://yum.kaos.st/kaos-repo-latest.el7.noarch.rpm
-[sudo] yum install uc
+```bash
+sudo yum install -y https://yum.kaos.st/get/$(uname -r).rpm
+sudo yum install uc
 ```
 
 #### Prebuilt binaries
@@ -67,20 +61,20 @@ bash <(curl -fsSL https://apps.kaos.st/get) uc
 You can generate completion for `bash`, `zsh` or `fish` shell.
 
 Bash:
-```
-[sudo] uc --completion=bash 1> /etc/bash_completion.d/uc
+```bash
+sudo uc --completion=bash 1> /etc/bash_completion.d/uc
 ```
 
 
 ZSH:
-```
-[sudo] uc --completion=zsh 1> /usr/share/zsh/site-functions/uc
+```bash
+sudo uc --completion=zsh 1> /usr/share/zsh/site-functions/uc
 ```
 
 
 Fish:
-```
-[sudo] uc --completion=fish 1> /usr/share/fish/vendor_completions.d/uc.fish
+```bash
+sudo uc --completion=fish 1> /usr/share/fish/vendor_completions.d/uc.fish
 ```
 
 ### Usage
