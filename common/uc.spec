@@ -10,7 +10,7 @@
 
 Summary:         Simple utility for counting unique lines
 Name:            uc
-Version:         0.0.2
+Version:         1.0.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -20,7 +20,7 @@ Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.11
+BuildRequires:   golang >= 1.14
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -42,7 +42,11 @@ go build src/github.com/essentialkaos/%{name}/%{name}.go
 rm -rf %{buildroot}
 
 install -dm 755 %{buildroot}%{_bindir}
+install -dm 755 %{buildroot}%{_mandir}/man1
+
 install -pm 755 %{name} %{buildroot}%{_bindir}/
+
+./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
 
 %clean
 rm -rf %{buildroot}
@@ -52,11 +56,16 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc LICENSE
+%{_mandir}/man1/%{name}.1.*
 %{_bindir}/%{name}
 
 ################################################################################
 
 %changelog
+* Thu Oct 22 2020 Anton Novojilov <andy@essentialkaos.com> - 1.0.0-0
+- Added possibility to define -m/--max option as number with K and M
+- Added man page generation
+
 * Fri Jan 31 2020 Anton Novojilov <andy@essentialkaos.com> - 0.0.2-0
 - Added option -m/--max for defining maximum unique lines to process
 - Added option -d/--dist for printing data distribution
