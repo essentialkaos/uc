@@ -14,20 +14,23 @@ import (
 	"os"
 	"runtime"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v11/fmtc"
-	"pkg.re/essentialkaos/ek.v11/fmtutil"
-	"pkg.re/essentialkaos/ek.v11/fsutil"
-	"pkg.re/essentialkaos/ek.v11/options"
-	"pkg.re/essentialkaos/ek.v11/signal"
-	"pkg.re/essentialkaos/ek.v11/strutil"
-	"pkg.re/essentialkaos/ek.v11/usage"
-	"pkg.re/essentialkaos/ek.v11/usage/completion/bash"
-	"pkg.re/essentialkaos/ek.v11/usage/completion/fish"
-	"pkg.re/essentialkaos/ek.v11/usage/completion/zsh"
-	"pkg.re/essentialkaos/ek.v11/usage/update"
+	"pkg.re/essentialkaos/ek.v12/fmtc"
+	"pkg.re/essentialkaos/ek.v12/fmtutil"
+	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/options"
+	"pkg.re/essentialkaos/ek.v12/signal"
+	"pkg.re/essentialkaos/ek.v12/strutil"
+	"pkg.re/essentialkaos/ek.v12/usage"
+	"pkg.re/essentialkaos/ek.v12/usage/completion/bash"
+	"pkg.re/essentialkaos/ek.v12/usage/completion/fish"
+	"pkg.re/essentialkaos/ek.v12/usage/completion/zsh"
+	"pkg.re/essentialkaos/ek.v12/usage/man"
+	"pkg.re/essentialkaos/ek.v12/usage/update"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -35,7 +38,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "0.0.2"
+	VER  = "1.0.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -48,7 +51,8 @@ const (
 	OPT_HELP         = "h:help"
 	OPT_VER          = "v:version"
 
-	OPT_COMPLETION = "completion"
+	OPT_COMPLETION   = "completion"
+	OPT_GENERATE_MAN = "generate-man"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -92,14 +96,15 @@ func (s linesSlice) Less(i, j int) bool {
 
 // optMap is map with options
 var optMap = options.Map{
-	OPT_MAX_LINES:    {Type: options.INT},
+	OPT_MAX_LINES:    {Type: options.MIXED},
 	OPT_DISTRIBUTION: {Type: options.BOOL},
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
 	OPT_HELP:         {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:          {Type: options.BOOL, Alias: "ver"},
 
-	OPT_COMPLETION: {},
+	OPT_COMPLETION:   {},
+	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
 // stats contains info about data
@@ -127,7 +132,12 @@ func main() {
 	}
 
 	if options.Has(OPT_COMPLETION) {
-		genCompletion()
+		os.Exit(genCompletion())
+	}
+
+	if options.Has(OPT_GENERATE_MAN) {
+		genMan()
+		os.Exit(0)
 	}
 
 	configureUI()
@@ -195,7 +205,12 @@ func processData(input string) {
 func readData(s *bufio.Scanner) {
 	ct := crc64.MakeTable(crc64.ECMA)
 	dist := options.GetB(OPT_DISTRIBUTION)
-	maxLines := options.GetI(OPT_MAX_LINES)
+	maxLines, err := parseMaxLines(options.GetS(OPT_MAX_LINES))
+
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
 
 	if dist {
 		stats.Samples = make(map[uint64]string)
@@ -299,6 +314,30 @@ func printDistribution() {
 	}
 }
 
+// parseMaxLines parses max line option
+func parseMaxLines(maxLines string) (int, error) {
+	maxLines = strings.ToUpper(maxLines)
+
+	mp := 1
+
+	switch {
+	case strings.HasSuffix(maxLines, "K"):
+		maxLines = strutil.Exclude(maxLines, "K")
+		mp = 1000
+	case strings.HasSuffix(maxLines, "M"):
+		mp = 1000 * 1000
+		maxLines = strutil.Exclude(maxLines, "M")
+	}
+
+	num, err := strconv.Atoi(maxLines)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return num * mp, nil
+}
+
 // signalHandler is signal handler
 func signalHandler() {
 	printResults()
@@ -312,9 +351,40 @@ func printError(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage print usage info
+// showUsage prints usage info
 func showUsage() {
 	genUsage().Render()
+}
+
+// showAbout prints info about version
+func showAbout() {
+	genAbout().Render()
+}
+
+// genCompletion generates completion for different shells
+func genCompletion() int {
+	switch options.GetS(OPT_COMPLETION) {
+	case "bash":
+		fmt.Printf(bash.Generate(genUsage(), APP))
+	case "fish":
+		fmt.Printf(fish.Generate(genUsage(), APP))
+	case "zsh":
+		fmt.Printf(zsh.Generate(genUsage(), optMap, APP))
+	default:
+		return 1
+	}
+
+	return 0
+}
+
+// genMan generates man page
+func genMan() {
+	fmt.Println(
+		man.Generate(
+			genUsage(),
+			genAbout(),
+		),
+	)
 }
 
 // genUsage generates usage info
@@ -331,6 +401,7 @@ func genUsage() *usage.Info {
 
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
+	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt for 5,000 uniq lines max")
 	info.AddRawExample(
 		"cat file.txt | "+APP+" -",
 		"Count unique lines in stdin data",
@@ -339,33 +410,16 @@ func genUsage() *usage.Info {
 	return info
 }
 
-// genCompletion generates completion for different shells
-func genCompletion() {
-	switch options.GetS(OPT_COMPLETION) {
-	case "bash":
-		fmt.Printf(bash.Generate(genUsage(), APP))
-	case "fish":
-		fmt.Printf(fish.Generate(genUsage(), APP))
-	case "zsh":
-		fmt.Printf(zsh.Generate(genUsage(), optMap, APP))
-	default:
-		os.Exit(1)
-	}
-
-	os.Exit(0)
-}
-
-// showAbout print info about version
-func showAbout() {
-	about := &usage.About{
+// genAbout generates info about version
+func genAbout() *usage.About {
+	return &usage.About{
 		App:           APP,
 		Version:       VER,
 		Desc:          DESC,
 		Year:          2009,
-		Owner:         "Essential Kaos",
+		Owner:         "ESSENTIAL KAOS",
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+		BugTracker:    "https://github.com/essentialkaos/uc",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/uc", update.GitHubChecker},
 	}
-
-	about.Render()
 }

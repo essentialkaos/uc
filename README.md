@@ -78,6 +78,14 @@ Fish:
 sudo uc --completion=fish 1> /usr/share/fish/vendor_completions.d/uc.fish
 ```
 
+### Man documentation
+
+You can generate man page for `uc` using next command:
+
+```bash
+uc --generate-man | sudo gzip > /usr/share/man/man1/uc.1.gz
+```
+
 ### Usage
 
 ```
@@ -100,6 +108,9 @@ Examples
 
   uc -d file.txt
   Show distribution for file.txt
+
+  uc -d -m 5k file.txt
+  Show distribution for file.txt for 5,000 uniq lines max
 
   cat file.txt | uc -
   Count unique lines in stdin data
