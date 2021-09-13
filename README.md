@@ -1,10 +1,10 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/uc.svg"/></a></p>
 
 <p align="center">
-  <a href="https://github.com/essentialkaos/uc/actions"><img src="https://github.com/essentialkaos/uc/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
-  <a href="https://github.com/essentialkaos/uc/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/uc/workflows/CodeQL/badge.svg" /></a>
-  <a href="https://goreportcard.com/report/github.com/essentialkaos/uc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/uc"></a>
-  <a href="https://codebeat.co/projects/github-com-essentialkaos-uc-master"><img alt="codebeat badge" src="https://codebeat.co/badges/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7" /></a>
+  <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/r/uc"><img src="https://kaos.sh/r/uc.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/b/uc"><img src="https://kaos.sh/b/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7.svg" alt="codebeat badge" /></a>
+  <a href="https://kaos.sh/w/uc/codeql"><img src="https://kaos.sh/w/uc/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
@@ -22,7 +22,7 @@
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go 1.14+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/uc
@@ -110,6 +110,13 @@ Examples
   Count unique lines in stdin data
 
 ```
+
+### Build Status
+
+| Branch | Status |
+|--------|--------|
+| `master` | [![CI](https://kaos.sh/w/uc/ci.svg?branch=master)](https://kaos.sh/w/uc/ci?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/uc/ci.svg?branch=master)](https://kaos.sh/w/uc/ci?query=branch:develop) |
 
 ### Contributing
 
