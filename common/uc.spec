@@ -10,7 +10,7 @@
 
 Summary:         Simple utility for counting unique lines
 Name:            uc
-Version:         1.0.0
+Version:         1.0.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -62,6 +62,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Tue Mar 29 2022 Anton Novojilov <andy@essentialkaos.com> - 1.0.1-0
+- Removed pkg.re usage
+- Added module info
+- Added Dependabot configuration
+
 * Thu Oct 22 2020 Anton Novojilov <andy@essentialkaos.com> - 1.0.0-0
 - Added possibility to define -m/--max option as number with K and M
 - Added man page generation
