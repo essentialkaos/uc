@@ -19,18 +19,18 @@ import (
 	"sync"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v12/fmtc"
-	"pkg.re/essentialkaos/ek.v12/fmtutil"
-	"pkg.re/essentialkaos/ek.v12/fsutil"
-	"pkg.re/essentialkaos/ek.v12/options"
-	"pkg.re/essentialkaos/ek.v12/signal"
-	"pkg.re/essentialkaos/ek.v12/strutil"
-	"pkg.re/essentialkaos/ek.v12/usage"
-	"pkg.re/essentialkaos/ek.v12/usage/completion/bash"
-	"pkg.re/essentialkaos/ek.v12/usage/completion/fish"
-	"pkg.re/essentialkaos/ek.v12/usage/completion/zsh"
-	"pkg.re/essentialkaos/ek.v12/usage/man"
-	"pkg.re/essentialkaos/ek.v12/usage/update"
+	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/signal"
+	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v12/usage"
+	"github.com/essentialkaos/ek/v12/usage/completion/bash"
+	"github.com/essentialkaos/ek/v12/usage/completion/fish"
+	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
+	"github.com/essentialkaos/ek/v12/usage/man"
+	"github.com/essentialkaos/ek/v12/usage/update"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -38,7 +38,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "1.0.0"
+	VER  = "1.0.1"
 	DESC = "Tool for counting unique lines"
 )
 
