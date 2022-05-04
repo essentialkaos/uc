@@ -38,7 +38,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "1.0.1"
+	VER  = "1.0.2"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -158,7 +158,7 @@ func main() {
 		signal.QUIT: signalHandler,
 	}.TrackAsync()
 
-	processData(args[0])
+	processData(args.Get(0).String())
 }
 
 // configureUI configures user interface
