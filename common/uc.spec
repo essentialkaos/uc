@@ -10,7 +10,7 @@
 
 Summary:         Simple utility for counting unique lines
 Name:            uc
-Version:         1.0.1
+Version:         1.1.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -64,6 +64,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Wed Aug 10 2022 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-0
+- Minor UI improvements
+- Fixed bug with parsing max number of unique lines
+- Updated dependencies
+
 * Tue Mar 29 2022 Anton Novojilov <andy@essentialkaos.com> - 1.0.1-0
 - Removed pkg.re usage
 - Added module info
