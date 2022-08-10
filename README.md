@@ -16,7 +16,7 @@
 
 ### Usage demo
 
-[![demo](https://gh.kaos.st/uc-001.gif)](#usage-demo)
+[![demo](https://gh.kaos.st/uc-110.gif)](#usage-demo)
 
 ### Installation
 
@@ -88,7 +88,7 @@ Usage: uc {options} file
 Options
 
   --dist, -d            Show number of occurrences for every line
-  --max, -m num         Max number of unique lines (default: 5000)
+  --max, -m num         Max number of unique lines
   --no-progress, -np    Disable progress output
   --no-progress, -np    Disable progress output
   --no-color, -nc       Disable colors in output
@@ -104,11 +104,10 @@ Examples
   Show distribution for file.txt
 
   uc -d -m 5k file.txt
-  Show distribution for file.txt for 5,000 uniq lines max
+  Show distribution for file.txt with 5,000 uniq lines max
 
   cat file.txt | uc -
   Count unique lines in stdin data
-
 ```
 
 ### Build Status

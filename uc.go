@@ -38,7 +38,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "1.0.1"
+	VER  = "1.1.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -96,7 +96,7 @@ func (s linesSlice) Less(i, j int) bool {
 
 // optMap is map with options
 var optMap = options.Map{
-	OPT_MAX_LINES:    {Type: options.MIXED},
+	OPT_MAX_LINES:    {Type: options.INT},
 	OPT_DISTRIBUTION: {Type: options.BOOL},
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
@@ -158,7 +158,7 @@ func main() {
 		signal.QUIT: signalHandler,
 	}.TrackAsync()
 
-	processData(args[0])
+	processData(args.Get(0).String())
 }
 
 // configureUI configures user interface
@@ -257,7 +257,7 @@ func readData(s *bufio.Scanner) {
 
 // printProgress shows data processing progress
 func printProgress() {
-	for range time.NewTicker(time.Second / 5).C {
+	for range time.NewTicker(time.Second / 4).C {
 		stats.mx.Lock()
 
 		if stats.Finished {
@@ -316,6 +316,10 @@ func printDistribution() {
 
 // parseMaxLines parses max line option
 func parseMaxLines(maxLines string) (int, error) {
+	if maxLines == "" {
+		return 0, nil
+	}
+
 	maxLines = strings.ToUpper(maxLines)
 
 	mp := 1
@@ -392,7 +396,7 @@ func genUsage() *usage.Info {
 	info := usage.NewInfo(APP, "file")
 
 	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line")
-	info.AddOption(OPT_MAX_LINES, "Max number of unique lines {s-}(default: 5000){!}", "num")
+	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
@@ -401,7 +405,7 @@ func genUsage() *usage.Info {
 
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
-	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt for 5,000 uniq lines max")
+	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
 	info.AddRawExample(
 		"cat file.txt | "+APP+" -",
 		"Count unique lines in stdin data",
