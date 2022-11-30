@@ -11,7 +11,7 @@
 Summary:         Simple utility for counting unique lines
 Name:            uc
 Version:         1.1.0
-Release:         0%{?dist}
+Release:         1%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
 URL:             https://kaos.sh/uc
@@ -20,7 +20,7 @@ Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.17
+BuildRequires:   golang >= 1.19
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -35,9 +35,9 @@ Simple utility for counting unique lines.
 %setup -q
 
 %build
-export GOPATH=$(pwd)
-pushd src/github.com/essentialkaos/%{name}
-  go build -mod vendor -o $GOPATH/%{name} %{name}.go
+pushd %{name}
+  go build %{name}.go
+  cp LICENSE ..
 popd
 
 %install
@@ -46,9 +46,9 @@ rm -rf %{buildroot}
 install -dm 755 %{buildroot}%{_bindir}
 install -dm 755 %{buildroot}%{_mandir}/man1
 
-install -pm 755 %{name} %{buildroot}%{_bindir}/
+install -pm 755 %{name}/%{name} %{buildroot}%{_bindir}/
 
-./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+./%{name}/%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
 
 %clean
 rm -rf %{buildroot}
@@ -64,6 +64,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Thu Dec 01 2022 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-1
+- Fixed build using sources from source.kaos.st
+
 * Wed Aug 10 2022 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-0
 - Minor UI improvements
 - Fixed bug with parsing max number of unique lines
