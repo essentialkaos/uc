@@ -1,24 +1,24 @@
 ################################################################################
 
-%define  debug_package %{nil}
+%define debug_package  %{nil}
 
 ################################################################################
 
-Summary:         Simple utility for counting unique lines
-Name:            uc
-Version:         1.1.0
-Release:         1%{?dist}
-Group:           Applications/System
-License:         Apache License, Version 2.0
-URL:             https://kaos.sh/uc
+Summary:        Simple utility for counting unique lines
+Name:           uc
+Version:        1.1.1
+Release:        0%{?dist}
+Group:          Applications/System
+License:        Apache License, Version 2.0
+URL:            https://kaos.sh/uc
 
-Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
+Source0:        https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
-BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.19
+BuildRequires:  golang >= 1.19
 
-Provides:        %{name} = %{version}-%{release}
+Provides:       %{name} = %{version}-%{release}
 
 ################################################################################
 
@@ -65,6 +65,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Mon Mar 06 2023 Anton Novojilov <andy@essentialkaos.com> - 1.1.1-0
+- Added verbose info output
+- Dependencies update
+- Code refactoring
+
 * Thu Dec 01 2022 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-1
 - Fixed build using sources from source.kaos.st
 
