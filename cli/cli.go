@@ -103,8 +103,8 @@ var optMap = options.Map{
 	OPT_DISTRIBUTION: {Type: options.BOOL},
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
-	OPT_HELP:         {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:          {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:         {Type: options.BOOL},
+	OPT_VER:          {Type: options.BOOL},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
