@@ -119,9 +119,10 @@ var rawMode bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main function
-func Init(gitRev string, gomod []byte) {
+// Run is main application function
+func Run(gitRev string, gomod []byte) {
 	runtime.GOMAXPROCS(1)
+
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)
@@ -380,12 +381,12 @@ func printError(f string, a ...interface{}) {
 
 // showUsage prints usage info
 func showUsage() {
-	genUsage().Render()
+	genUsage().Print()
 }
 
 // showAbout prints info about version
 func showAbout(gitRev string) {
-	genAbout(gitRev).Render()
+	genAbout(gitRev).Print()
 }
 
 // genCompletion generates completion for different shells
