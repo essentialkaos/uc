@@ -128,12 +128,7 @@ func Run(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		printError("Options parsing errors:")
-
-		for _, err := range errs {
-			printError("  %v", err)
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
