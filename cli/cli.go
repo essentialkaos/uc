@@ -141,17 +141,18 @@ func Run(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		printMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
+		genAbout(gitRev).Print()
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
 		support.Print(APP, VER, gitRev, gomod)
 		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		showUsage()
+		genUsage().Print()
 		os.Exit(0)
 	}
 
@@ -379,18 +380,8 @@ func printError(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() {
-	genUsage().Print()
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) {
-	genAbout(gitRev).Print()
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
 		fmt.Printf(bash.Generate(genUsage(), APP))
@@ -405,16 +396,14 @@ func genCompletion() int {
 	return 0
 }
 
-// genMan generates man page
-func genMan() int {
+// printMan prints man page
+func printMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
 			genAbout(""),
 		),
 	)
-
-	return 0
 }
 
 // genUsage generates usage info
