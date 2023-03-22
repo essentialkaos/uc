@@ -1,7 +1,10 @@
 module github.com/essentialkaos/uc
 
-go 1.17
+go 1.18
 
-require github.com/essentialkaos/ek/v12 v12.53.0
+require (
+	github.com/essentialkaos/depsy v1.0.0
+	github.com/essentialkaos/ek/v12 v12.63.0
+)
 
-require golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
+require golang.org/x/sys v0.6.0 // indirect
