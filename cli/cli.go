@@ -319,7 +319,7 @@ func printResults() {
 	stats.mx.Unlock()
 }
 
-// printDistribution prints distrubution info
+// printDistribution prints distribution info
 func printDistribution() {
 	var distData linesSlice
 
