@@ -66,7 +66,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Wed May 03 2023 Anton Novojilov <andy@essentialkaos.com> - 2.0.0-0
-- Better stdin handling
+- Better standard input handling
 
 * Mon Mar 06 2023 Anton Novojilov <andy@essentialkaos.com> - 1.1.1-0
 - Added verbose info output
