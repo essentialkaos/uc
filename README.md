@@ -101,7 +101,7 @@ Examples
   uc -d -m 5k file.txt
   Show distribution for file.txt with 5,000 uniq lines max
 
-  cat file.txt | uc -
+  cat file.txt | uc
   Count unique lines in stdin data
 ```
 
