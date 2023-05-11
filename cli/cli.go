@@ -40,7 +40,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "1.1.1"
+	VER  = "2.0.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -104,7 +104,7 @@ var optMap = options.Map{
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
 	OPT_HELP:         {Type: options.BOOL},
-	OPT_VER:          {Type: options.BOOL},
+	OPT_VER:          {Type: options.MIXED},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -141,12 +141,12 @@ func Run(gitRev string, gomod []byte) {
 		printMan()
 		os.Exit(0)
 	case options.GetB(OPT_VER):
-		genAbout(gitRev).Print()
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
 		support.Print(APP, VER, gitRev, gomod)
 		os.Exit(0)
-	case options.GetB(OPT_HELP) || len(args) == 0:
+	case options.GetB(OPT_HELP):
 		genUsage().Print()
 		os.Exit(0)
 	}
@@ -157,7 +157,7 @@ func Run(gitRev string, gomod []byte) {
 		signal.QUIT: signalHandler,
 	}.TrackAsync()
 
-	processData(args.Get(0).String())
+	processData(args)
 }
 
 // preConfigureUI preconfigures UI based on information about user terminal
@@ -197,13 +197,15 @@ func configureUI() {
 }
 
 // processData starts data processing
-func processData(input string) {
+func processData(args options.Arguments) {
 	var r *bufio.Reader
 
 	stats = &Stats{
 		Counters: make(map[uint64]uint32),
 		mx:       &sync.Mutex{},
 	}
+
+	input := getInput(args)
 
 	if input == "-" {
 		r = bufio.NewReader(os.Stdin)
@@ -219,6 +221,23 @@ func processData(input string) {
 	}
 
 	readData(bufio.NewScanner(r))
+}
+
+// getInput returns input for reading data
+func getInput(args options.Arguments) string {
+	if args.Get(0).String() == "-" || !fsutil.IsCharacterDevice("/dev/stdin") {
+		return "-"
+	}
+
+	input := args.Get(0).Clean().String()
+	err := fsutil.ValidatePerms("FRS", input)
+
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
+
+	return input
 }
 
 // readData reads data
@@ -319,7 +338,7 @@ func printResults() {
 	stats.mx.Unlock()
 }
 
-// printDistribution prints distrubution info
+// printDistribution prints distribution info
 func printDistribution() {
 	var distData linesSlice
 
@@ -416,10 +435,8 @@ func genUsage() *usage.Info {
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
-	info.AddRawExample(
-		"cat file.txt | "+APP+" -",
-		"Count unique lines in stdin data",
-	)
+	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
+	info.AddRawExample(APP+" -m 100 < file.txt", "Count unique lines in stdin data with 100 uniq lines max")
 
 	return info
 }

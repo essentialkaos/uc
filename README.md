@@ -1,9 +1,10 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/uc.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/uc"><img src="https://kaos.sh/r/uc.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/l/uc"><img src="https://kaos.sh/l/29edb01c21de207a27ed.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/b/uc"><img src="https://kaos.sh/b/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7.svg" alt="codebeat badge" /></a>
+  <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/uc/codeql"><img src="https://kaos.sh/w/uc/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
@@ -22,7 +23,7 @@
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go 1.19+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/uc@latest
@@ -100,7 +101,7 @@ Examples
   uc -d -m 5k file.txt
   Show distribution for file.txt with 5,000 uniq lines max
 
-  cat file.txt | uc -
+  cat file.txt | uc
   Count unique lines in stdin data
 ```
 
