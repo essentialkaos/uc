@@ -103,6 +103,9 @@ Examples
 
   cat file.txt | uc
   Count unique lines in stdin data
+
+  uc -m 100 < file.txt
+  Count unique lines in stdin data with 100 uniq lines max
 ```
 
 ### Build Status

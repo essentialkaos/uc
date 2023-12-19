@@ -25,6 +25,7 @@ import (
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
@@ -40,7 +41,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "2.0.0"
+	VER  = "2.0.1"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -117,6 +118,12 @@ var stats *Stats
 // rawMode is raw mode flag
 var rawMode bool
 
+// colorTagApp contains color tag for app name
+var colorTagApp string
+
+// colorTagVer contains color tag for app version
+var colorTagVer string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Run is main application function
@@ -162,26 +169,9 @@ func Run(gitRev string, gomod []byte) {
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
-	term := os.Getenv("TERM")
-
-	fmtc.DisableColors = true
-
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+	if !tty.IsTTY() {
 		fmtc.DisableColors = true
 		rawMode = true
-	}
-
-	if os.Getenv("NO_COLOR") != "" {
-		fmtc.DisableColors = true
 	}
 }
 
@@ -193,6 +183,13 @@ func configureUI() {
 
 	if options.GetB(OPT_NO_PROGRESS) {
 		rawMode = true
+	}
+
+	switch {
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{#168}", "{#168}"
+	default:
+		colorTagApp, colorTagVer = "{*}{m}", "{m}"
 	}
 }
 
@@ -398,11 +395,11 @@ func printError(f string, a ...interface{}) {
 func printCompletion() int {
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(genUsage(), APP))
+		fmt.Print(bash.Generate(genUsage(), APP))
 	case "fish":
-		fmt.Printf(fish.Generate(genUsage(), APP))
+		fmt.Print(fish.Generate(genUsage(), APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(genUsage(), optMap, APP))
+		fmt.Print(zsh.Generate(genUsage(), optMap, APP))
 	default:
 		return 1
 	}
@@ -424,6 +421,8 @@ func printMan() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo(APP, "file")
 
+	info.AppNameColorTag = colorTagApp
+
 	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line")
 	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
@@ -436,7 +435,11 @@ func genUsage() *usage.Info {
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
 	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
-	info.AddRawExample(APP+" -m 100 < file.txt", "Count unique lines in stdin data with 100 uniq lines max")
+
+	info.AddRawExample(
+		APP+" -m 100 < file.txt",
+		"Count unique lines in stdin data with 100 uniq lines max",
+	)
 
 	return info
 }
@@ -444,11 +447,16 @@ func genUsage() *usage.Info {
 // genAbout generates info about version
 func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
-		App:           APP,
-		Version:       VER,
-		Desc:          DESC,
-		Year:          2009,
-		Owner:         "ESSENTIAL KAOS",
+		App:     APP,
+		Version: VER,
+		Desc:    DESC,
+		Year:    2009,
+		Owner:   "ESSENTIAL KAOS",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
+
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		BugTracker:    "https://github.com/essentialkaos/uc",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/uc", update.GitHubChecker},
