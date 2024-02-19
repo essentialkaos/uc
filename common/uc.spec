@@ -6,7 +6,7 @@
 
 Summary:        Simple utility for counting unique lines
 Name:           uc
-Version:        2.0.1
+Version:        3.0.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache License, Version 2.0
@@ -16,7 +16,7 @@ Source0:        https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.19
+BuildRequires:  golang >= 1.20
 
 Provides:       %{name} = %{version}-%{release}
 
@@ -65,6 +65,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Mon Feb 19 2024 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
+- crc64 replaced by xxhash
+- Code refactoring
+- Dependencies update
+
 * Tue Dec 19 2023 Anton Novojilov <andy@essentialkaos.com> - 2.0.1-0
 - Dependencies update
 - Code refactoring
