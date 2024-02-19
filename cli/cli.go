@@ -20,6 +20,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
@@ -103,7 +104,7 @@ func (s linesSlice) Less(i, j int) bool {
 // optMap is map with options
 var optMap = options.Map{
 	OPT_MAX_LINES:    {Type: options.INT},
-	OPT_DISTRIBUTION: {Type: options.BOOL},
+	OPT_DISTRIBUTION: {Type: options.MIXED},
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
 	OPT_HELP:         {Type: options.BOOL},
@@ -175,6 +176,10 @@ func preConfigureUI() {
 		fmtc.DisableColors = true
 		rawMode = true
 	}
+
+	table.FullScreen = false
+	table.HeaderCapitalize = true
+	table.BorderSymbol = "–"
 }
 
 // configureUI configures user interface
@@ -341,11 +346,62 @@ func printDistribution() {
 		distData = append(distData, LineInfo{crc, num})
 	}
 
+	fmtc.TPrintf("")
+
 	sort.Sort(sort.Reverse(distData))
 
-	for _, info := range distData {
-		fmtc.TPrintf(" %7d %s\n", info.Num, string(stats.Samples[info.CRC]))
+	switch options.GetS(OPT_DISTRIBUTION) {
+	case "simple":
+		printDistributionSimple(distData)
+	case "table":
+		printDistributionTable(distData)
+	case "json":
+		printDistributionJSON(distData)
+	default:
+		printDistributionDefault(distData)
 	}
+}
+
+// printDistributionDefault prints distribution info in default format
+func printDistributionDefault(data linesSlice) {
+	for _, info := range data {
+		fmtc.Printf(" %7d %s\n", info.Num, string(stats.Samples[info.CRC]))
+	}
+}
+
+// printDistributionSimple prints distribution info in simple format
+func printDistributionSimple(data linesSlice) {
+	for _, info := range data {
+		fmtc.Printf("%d %s\n", info.Num, string(stats.Samples[info.CRC]))
+	}
+}
+
+// printDistributionTable prints distribution info as a table
+func printDistributionTable(data linesSlice) {
+	t := table.NewTable("#", "DATA")
+
+	for _, info := range data {
+		t.Add(fmtutil.PrettyNum(info.Num), string(stats.Samples[info.CRC]))
+	}
+
+	t.Render()
+}
+
+// printDistributionTable prints distribution info in JSON format
+func printDistributionJSON(data linesSlice) {
+	fmt.Println("[")
+
+	for index, info := range data {
+		fmt.Printf(`  {"num":%d, "data":"%s"}`, info.Num, string(stats.Samples[info.CRC]))
+
+		if index+1 != len(data) {
+			fmt.Println(",")
+		} else {
+			fmt.Println("")
+		}
+	}
+
+	fmt.Println("]")
 }
 
 // parseMaxLines parses max line option
@@ -421,7 +477,7 @@ func genUsage() *usage.Info {
 
 	info.AppNameColorTag = colorTagApp
 
-	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line")
+	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/simple/table/json){!}", "?format")
 	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
@@ -430,6 +486,7 @@ func genUsage() *usage.Info {
 
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
+	info.AddExample("--dist=table file.txt", "Show distribution as a table for file.txt")
 	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
 	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 

@@ -102,9 +102,8 @@ Usage: uc {options} file
 
 Options
 
-  --dist, -d            Show number of occurrences for every line
+  --dist, -d format     Show number of occurrences for every line (-/simple/table/json)
   --max, -m num         Max number of unique lines
-  --no-progress, -np    Disable progress output
   --no-progress, -np    Disable progress output
   --no-color, -nc       Disable colors in output
   --help, -h            Show this help message
@@ -117,6 +116,9 @@ Examples
 
   uc -d file.txt
   Show distribution for file.txt
+
+  uc --dist=table file.txt
+  Show distribution as a table for file.txt
 
   uc -d -m 5k file.txt
   Show distribution for file.txt with 5,000 uniq lines max
