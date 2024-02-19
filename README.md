@@ -19,11 +19,31 @@
 
 [![demo](https://gh.kaos.st/uc-110.gif)](#usage-demo)
 
+### Benchmarks
+
+```
+$ wc -l data.txt
+18408096 data.txt
+
+$ hyperfine 'sort -u data.txt | wc -l' 'uc -np data.txt'
+Benchmark 1: sort -u data.txt | wc -l
+  Time (mean ± σ):     16.030 s ±  0.181 s    [User: 86.713 s, System: 1.165 s]
+  Range (min … max):   15.699 s … 16.324 s    10 runs
+
+Benchmark 2: uc -np data.txt
+  Time (mean ± σ):      2.889 s ±  0.101 s    [User: 2.435 s, System: 0.454 s]
+  Range (min … max):    2.721 s …  3.065 s    10 runs
+
+Summary
+  uc -np data.txt ran
+    5.55 ± 0.20 times faster than sort -u data.txt | wc -l
+```
+
 ### Installation
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go 1.20+ workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/uc@latest
@@ -82,9 +102,8 @@ Usage: uc {options} file
 
 Options
 
-  --dist, -d            Show number of occurrences for every line
+  --dist, -d format     Show number of occurrences for every line (-/simple/table/json)
   --max, -m num         Max number of unique lines
-  --no-progress, -np    Disable progress output
   --no-progress, -np    Disable progress output
   --no-color, -nc       Disable colors in output
   --help, -h            Show this help message
@@ -97,6 +116,9 @@ Examples
 
   uc -d file.txt
   Show distribution for file.txt
+
+  uc --dist=table file.txt
+  Show distribution as a table for file.txt
 
   uc -d -m 5k file.txt
   Show distribution for file.txt with 5,000 uniq lines max

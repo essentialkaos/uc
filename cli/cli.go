@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -10,7 +10,6 @@ package cli
 import (
 	"bufio"
 	"fmt"
-	"hash/crc64"
 	"os"
 	"runtime"
 	"sort"
@@ -21,7 +20,9 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -33,6 +34,8 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
 
+	"github.com/cespare/xxhash"
+
 	"github.com/essentialkaos/uc/cli/support"
 )
 
@@ -41,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "2.0.1"
+	VER  = "3.0.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -68,8 +71,8 @@ const MAX_SAMPLE_SIZE = 512
 
 // Stats contains data info
 type Stats struct {
-	Counters       map[uint64]uint32 // crc64 → num
-	Samples        map[uint64]string // crc64 → sample (512 symbols)
+	Counters       map[uint64]uint32 // hash → num
+	Samples        map[uint64][]byte // hash → sample (512 symbols)
 	LastReadLines  uint64
 	LastReadBytes  float64
 	TotalReadLines uint64
@@ -101,7 +104,7 @@ func (s linesSlice) Less(i, j int) bool {
 // optMap is map with options
 var optMap = options.Map{
 	OPT_MAX_LINES:    {Type: options.INT},
-	OPT_DISTRIBUTION: {Type: options.BOOL},
+	OPT_DISTRIBUTION: {Type: options.MIXED},
 	OPT_NO_PROGRESS:  {Type: options.BOOL},
 	OPT_NO_COLOR:     {Type: options.BOOL},
 	OPT_HELP:         {Type: options.BOOL},
@@ -173,6 +176,10 @@ func preConfigureUI() {
 		fmtc.DisableColors = true
 		rawMode = true
 	}
+
+	table.FullScreen = false
+	table.HeaderCapitalize = true
+	table.BorderSymbol = "–"
 }
 
 // configureUI configures user interface
@@ -195,8 +202,6 @@ func configureUI() {
 
 // processData starts data processing
 func processData(args options.Arguments) {
-	var r *bufio.Reader
-
 	stats = &Stats{
 		Counters: make(map[uint64]uint32),
 		mx:       &sync.Mutex{},
@@ -205,19 +210,18 @@ func processData(args options.Arguments) {
 	input := getInput(args)
 
 	if input == "-" {
-		r = bufio.NewReader(os.Stdin)
-	} else {
-		fd, err := os.OpenFile(input, os.O_RDONLY, 0)
-
-		if err != nil {
-			printError(err.Error())
-			os.Exit(1)
-		}
-
-		r = bufio.NewReader(fd)
+		readData(bufio.NewScanner(os.Stdin))
+		return
 	}
 
-	readData(bufio.NewScanner(r))
+	fd, err := os.OpenFile(input, os.O_RDONLY, 0)
+
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
+
+	readData(bufio.NewScanner(fd))
 }
 
 // getInput returns input for reading data
@@ -239,7 +243,6 @@ func getInput(args options.Arguments) string {
 
 // readData reads data
 func readData(s *bufio.Scanner) {
-	ct := crc64.MakeTable(crc64.ECMA)
 	dist := options.GetB(OPT_DISTRIBUTION)
 	maxLines, err := parseMaxLines(options.GetS(OPT_MAX_LINES))
 
@@ -249,7 +252,7 @@ func readData(s *bufio.Scanner) {
 	}
 
 	if dist {
-		stats.Samples = make(map[uint64]string)
+		stats.Samples = make(map[uint64][]byte)
 	}
 
 	stats.LastReadDate = time.Now()
@@ -261,7 +264,7 @@ func readData(s *bufio.Scanner) {
 	for s.Scan() {
 		data := s.Bytes()
 		dataLen := float64(len(data))
-		dataCrc := crc64.Checksum(data, ct)
+		dataCrc := xxhash.Sum64(data)
 
 		stats.mx.Lock()
 
@@ -276,7 +279,7 @@ func readData(s *bufio.Scanner) {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = strutil.Substr(string(data), 0, MAX_SAMPLE_SIZE)
+				stats.Samples[dataCrc] = data[:mathutil.Min(len(data), MAX_SAMPLE_SIZE)]
 			}
 		}
 
@@ -343,11 +346,62 @@ func printDistribution() {
 		distData = append(distData, LineInfo{crc, num})
 	}
 
+	fmtc.TPrintf("")
+
 	sort.Sort(sort.Reverse(distData))
 
-	for _, info := range distData {
-		fmtc.TPrintf(" %7d %s\n", info.Num, stats.Samples[info.CRC])
+	switch options.GetS(OPT_DISTRIBUTION) {
+	case "simple":
+		printDistributionSimple(distData)
+	case "table":
+		printDistributionTable(distData)
+	case "json":
+		printDistributionJSON(distData)
+	default:
+		printDistributionDefault(distData)
 	}
+}
+
+// printDistributionDefault prints distribution info in default format
+func printDistributionDefault(data linesSlice) {
+	for _, info := range data {
+		fmtc.Printf(" %7d %s\n", info.Num, string(stats.Samples[info.CRC]))
+	}
+}
+
+// printDistributionSimple prints distribution info in simple format
+func printDistributionSimple(data linesSlice) {
+	for _, info := range data {
+		fmtc.Printf("%d %s\n", info.Num, string(stats.Samples[info.CRC]))
+	}
+}
+
+// printDistributionTable prints distribution info as a table
+func printDistributionTable(data linesSlice) {
+	t := table.NewTable("#", "DATA")
+
+	for _, info := range data {
+		t.Add(fmtutil.PrettyNum(info.Num), string(stats.Samples[info.CRC]))
+	}
+
+	t.Render()
+}
+
+// printDistributionTable prints distribution info in JSON format
+func printDistributionJSON(data linesSlice) {
+	fmt.Println("[")
+
+	for index, info := range data {
+		fmt.Printf(`  {"num":%d, "data":"%s"}`, info.Num, string(stats.Samples[info.CRC]))
+
+		if index+1 != len(data) {
+			fmt.Println(",")
+		} else {
+			fmt.Println("")
+		}
+	}
+
+	fmt.Println("]")
 }
 
 // parseMaxLines parses max line option
@@ -423,9 +477,8 @@ func genUsage() *usage.Info {
 
 	info.AppNameColorTag = colorTagApp
 
-	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line")
+	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/simple/table/json){!}", "?format")
 	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
-	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
@@ -433,6 +486,7 @@ func genUsage() *usage.Info {
 
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
+	info.AddExample("--dist=table file.txt", "Show distribution as a table for file.txt")
 	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
 	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 
