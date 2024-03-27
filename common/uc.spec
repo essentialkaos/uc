@@ -6,7 +6,7 @@
 
 Summary:        Simple utility for counting unique lines
 Name:           uc
-Version:        3.0.0
+Version:        3.0.1
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache License, Version 2.0
@@ -93,6 +93,11 @@ fi
 ################################################################################
 
 %changelog
+* Thu Mar 28 2024 Anton Novojilov <andy@essentialkaos.com> - 3.0.1-0
+- Improved support information gathering
+- Code refactoring
+- Dependencies update
+
 * Mon Feb 19 2024 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
 - crc64 replaced by xxhash
 - Added different output formats for distribution info
