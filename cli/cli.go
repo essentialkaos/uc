@@ -26,6 +26,8 @@ import (
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v12/support"
+	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -35,8 +37,6 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/update"
 
 	"github.com/cespare/xxhash"
-
-	"github.com/essentialkaos/uc/cli/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -44,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.0"
+	VER  = "3.0.1"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -154,7 +154,10 @@ func Run(gitRev string, gomod []byte) {
 		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.Print(APP, VER, gitRev, gomod)
+		support.Collect(APP, VER).
+			WithRevision(gitRev).
+			WithDeps(deps.Extract(gomod)).
+			Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
@@ -511,13 +514,13 @@ func genAbout(gitRev string) *usage.About {
 		VersionColorTag: colorTagVer,
 		DescSeparator:   "{s}—{!}",
 
-		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
-		BugTracker:    "https://github.com/essentialkaos/uc",
-		UpdateChecker: usage.UpdateChecker{"essentialkaos/uc", update.GitHubChecker},
+		License:    "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+		BugTracker: "https://github.com/essentialkaos/uc",
 	}
 
 	if gitRev != "" {
 		about.Build = "git:" + gitRev
+		about.UpdateChecker = usage.UpdateChecker{"essentialkaos/uc", update.GitHubChecker}
 	}
 
 	return about
