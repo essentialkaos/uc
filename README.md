@@ -97,38 +97,7 @@ uc --generate-man | sudo gzip > /usr/share/man/man1/uc.1.gz
 
 ### Usage
 
-```
-Usage: uc {options} file
-
-Options
-
-  --dist, -d format     Show number of occurrences for every line (-/simple/table/json)
-  --max, -m num         Max number of unique lines
-  --no-progress, -np    Disable progress output
-  --no-color, -nc       Disable colors in output
-  --help, -h            Show this help message
-  --version, -v         Show version
-
-Examples
-
-  uc file.txt
-  Count unique lines in file.txt
-
-  uc -d file.txt
-  Show distribution for file.txt
-
-  uc --dist=table file.txt
-  Show distribution as a table for file.txt
-
-  uc -d -m 5k file.txt
-  Show distribution for file.txt with 5,000 uniq lines max
-
-  cat file.txt | uc
-  Count unique lines in stdin data
-
-  uc -m 100 < file.txt
-  Count unique lines in stdin data with 100 uniq lines max
-```
+<img src=".github/images/usage.svg" />
 
 ### Build Status
 
