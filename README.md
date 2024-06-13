@@ -1,4 +1,4 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/uc.svg"/></a></p>
+<p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/r/uc"><img src="https://kaos.sh/r/uc.svg" alt="GoReportCard" /></a>
@@ -6,7 +6,7 @@
   <a href="https://kaos.sh/b/uc"><img src="https://kaos.sh/b/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/uc/codeql"><img src="https://kaos.sh/w/uc/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-  <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
+  <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
