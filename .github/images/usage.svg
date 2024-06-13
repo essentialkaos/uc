@@ -54,7 +54,7 @@
 
   <text x="50%" y="24" text-anchor="middle"><tspan class="terminal">Terminal</tspan></text>
 
-  <text x="12" y="60"><tspan class="bold">Usage:</tspan> <tspan class="bold ">uc</tspan> <tspan class="g">{options}</tspan> file</text>
+  <text x="12" y="60"><tspan class="bold">Usage:</tspan> <tspan class="bold" fill="#D75F87">uc</tspan> <tspan class="g">{options}</tspan> file</text>
   <text x="12" y="100"><tspan class="bold">Options</tspan></text>
   <text x="12" y="140">  <tspan class="g">--dist</tspan><tspan class="LG">, </tspan><tspan class="g">-d</tspan> <tspan class="DG">format</tspan> <tspan class="DG">...</tspan> Show number of occurrences for every line <tspan class="DG">(-/simple/table/json)</tspan></text>
   <text x="12" y="160">  <tspan class="g">--max</tspan><tspan class="LG">, </tspan><tspan class="g">-m</tspan> <tspan class="LG">num</tspan> <tspan class="DG">.......</tspan> Max number of unique lines</text>
