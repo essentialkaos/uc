@@ -1,4 +1,4 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/uc.svg"/></a></p>
+<p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/r/uc"><img src="https://kaos.sh/r/uc.svg" alt="GoReportCard" /></a>
@@ -6,7 +6,7 @@
   <a href="https://kaos.sh/b/uc"><img src="https://kaos.sh/b/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/uc/codeql"><img src="https://kaos.sh/w/uc/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-  <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
+  <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
@@ -97,38 +97,7 @@ uc --generate-man | sudo gzip > /usr/share/man/man1/uc.1.gz
 
 ### Usage
 
-```
-Usage: uc {options} file
-
-Options
-
-  --dist, -d format     Show number of occurrences for every line (-/simple/table/json)
-  --max, -m num         Max number of unique lines
-  --no-progress, -np    Disable progress output
-  --no-color, -nc       Disable colors in output
-  --help, -h            Show this help message
-  --version, -v         Show version
-
-Examples
-
-  uc file.txt
-  Count unique lines in file.txt
-
-  uc -d file.txt
-  Show distribution for file.txt
-
-  uc --dist=table file.txt
-  Show distribution as a table for file.txt
-
-  uc -d -m 5k file.txt
-  Show distribution for file.txt with 5,000 uniq lines max
-
-  cat file.txt | uc
-  Count unique lines in stdin data
-
-  uc -m 100 < file.txt
-  Count unique lines in stdin data with 100 uniq lines max
-```
+<img src=".github/images/usage.svg" />
 
 ### Build Status
 
