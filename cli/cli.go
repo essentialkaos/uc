@@ -28,6 +28,7 @@ import (
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/support"
 	"github.com/essentialkaos/ek/v12/support/deps"
+	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -44,7 +45,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.1"
+	VER  = "3.0.2"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -137,8 +138,9 @@ func Run(gitRev string, gomod []byte) {
 
 	args, errs := options.Parse(optMap)
 
-	if len(errs) != 0 {
-		printError(errs[0].Error())
+	if !errs.IsEmpty() {
+		terminal.Error("Options parsing errors:")
+		terminal.Error(errs.String())
 		os.Exit(1)
 	}
 
@@ -220,7 +222,7 @@ func processData(args options.Arguments) {
 	fd, err := os.OpenFile(input, os.O_RDONLY, 0)
 
 	if err != nil {
-		printError(err.Error())
+		terminal.Error(err)
 		os.Exit(1)
 	}
 
@@ -237,7 +239,7 @@ func getInput(args options.Arguments) string {
 	err := fsutil.ValidatePerms("FRS", input)
 
 	if err != nil {
-		printError(err.Error())
+		terminal.Error(err)
 		os.Exit(1)
 	}
 
@@ -250,7 +252,7 @@ func readData(s *bufio.Scanner) {
 	maxLines, err := parseMaxLines(options.GetS(OPT_MAX_LINES))
 
 	if err != nil {
-		printError(err.Error())
+		terminal.Error(err)
 		os.Exit(1)
 	}
 
@@ -441,11 +443,6 @@ func signalHandler() {
 	os.Exit(0)
 }
 
-// printError prints error message to console
-func printError(f string, a ...interface{}) {
-	fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // printCompletion prints completion for given shell
@@ -491,8 +488,8 @@ func genUsage() *usage.Info {
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddExample("--dist=table file.txt", "Show distribution as a table for file.txt")
 	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
-	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 
+	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 	info.AddRawExample(
 		APP+" -m 100 < file.txt",
 		"Count unique lines in stdin data with 100 uniq lines max",
