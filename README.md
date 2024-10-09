@@ -42,7 +42,7 @@ Summary
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go 1.20+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go [1.22+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/uc@latest
@@ -51,8 +51,8 @@ go install github.com/essentialkaos/uc@latest
 #### From [ESSENTIAL KAOS Public Repository](https://pkgs.kaos.st)
 
 ```bash
-sudo yum install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
-sudo yum install uc
+sudo dnf install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
+sudo dnf install uc
 ```
 
 #### Prebuilt binaries
