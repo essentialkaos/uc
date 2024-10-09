@@ -1,13 +1,13 @@
 module github.com/essentialkaos/uc
 
-go 1.18
+go 1.22.8
 
 require (
 	github.com/cespare/xxhash v1.1.0
-	github.com/essentialkaos/ek/v13 v13.5.1
+	github.com/essentialkaos/ek/v13 v13.6.0
 )
 
 require (
-	github.com/essentialkaos/depsy v1.3.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
+	github.com/essentialkaos/depsy v1.3.1 // indirect
+	golang.org/x/sys v0.26.0 // indirect
 )
