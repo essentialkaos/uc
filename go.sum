@@ -2,12 +2,12 @@ github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/cespare/xxhash v1.1.0 h1:a6HrQnmkObjyL+Gs60czilIUGqrzKutQD6XZog3p+ko=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
-github.com/essentialkaos/check v1.4.0 h1:kWdFxu9odCxUqo1NNFNJmguGrDHgwi3A8daXX1nkuKk=
-github.com/essentialkaos/check v1.4.0/go.mod h1:LMKPZ2H+9PXe7Y2gEoKyVAwUqXVgx7KtgibfsHJPus0=
+github.com/essentialkaos/check v1.4.1 h1:SuxXzrbokPGTPWxGRnzy0hXvtb44mtVrdNxgPa1s4c8=
+github.com/essentialkaos/check v1.4.1/go.mod h1:xQOYwFvnxfVZyt5Qvjoa1SxcRqu5VyP77pgALr3iu+M=
 github.com/essentialkaos/depsy v1.3.1 h1:00k9QcMsdPM4IzDaEFHsTHBD/zoM0oxtB5+dMUwbQa8=
 github.com/essentialkaos/depsy v1.3.1/go.mod h1:B5+7Jhv2a2RacOAxIKU2OeJp9QfZjwIpEEPI5X7auWM=
-github.com/essentialkaos/ek/v13 v13.6.0 h1:8qb5R/dl5LEov0OfQXBwq3MSbHJjHSY62IKZG4lfy9M=
-github.com/essentialkaos/ek/v13 v13.6.0/go.mod h1:S5mCn90ernaPiLzwzV84XN5Sx+Qcdxed6mFPSq8EBDs=
+github.com/essentialkaos/ek/v13 v13.8.0 h1:6CrdnWQBqPM9gyCBz0HGjRzH++rjsvAL4P1k/IovMtk=
+github.com/essentialkaos/ek/v13 v13.8.0/go.mod h1:6G9EPJ/k4N0mugTLqPuWS/fb7K5JwoEqZSkNSfBCsgg=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
