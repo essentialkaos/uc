@@ -45,7 +45,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.2"
+	VER  = "3.0.3"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -92,14 +92,6 @@ type LineInfo struct {
 	Num uint32
 }
 
-type linesSlice []LineInfo
-
-func (s linesSlice) Len() int      { return len(s) }
-func (s linesSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-func (s linesSlice) Less(i, j int) bool {
-	return s[i].Num < s[j].Num
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap is map with options
@@ -140,7 +132,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.Error("- "))
+		terminal.Error(errs.Error(" - "))
 		os.Exit(1)
 	}
 
@@ -166,13 +158,14 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	signal.Handlers{
-		signal.INT:  signalHandler,
-		signal.TERM: signalHandler,
-		signal.QUIT: signalHandler,
-	}.TrackAsync()
+	registerSignalHandlers()
 
-	processData(args)
+	err := processData(args)
+
+	if err != nil {
+		terminal.Error(err)
+		os.Exit(1)
+	}
 }
 
 // preConfigureUI preconfigures UI based on information about user terminal
@@ -205,8 +198,16 @@ func configureUI() {
 	}
 }
 
+func registerSignalHandlers() {
+	signal.Handlers{
+		signal.INT:  signalHandler,
+		signal.TERM: signalHandler,
+		signal.QUIT: signalHandler,
+	}.TrackAsync()
+}
+
 // processData starts data processing
-func processData(args options.Arguments) {
+func processData(args options.Arguments) error {
 	stats = &Stats{
 		Counters: make(map[uint64]uint32),
 		mx:       &sync.Mutex{},
@@ -215,18 +216,16 @@ func processData(args options.Arguments) {
 	input := getInput(args)
 
 	if input == "-" {
-		readData(bufio.NewScanner(os.Stdin))
-		return
+		return readData(bufio.NewScanner(os.Stdin))
 	}
 
 	fd, err := os.OpenFile(input, os.O_RDONLY, 0)
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return err
 	}
 
-	readData(bufio.NewScanner(fd))
+	return readData(bufio.NewScanner(fd))
 }
 
 // getInput returns input for reading data
@@ -246,14 +245,13 @@ func getInput(args options.Arguments) string {
 	return input
 }
 
-// readData reads data
-func readData(s *bufio.Scanner) {
+// readData reads data from given source
+func readData(s *bufio.Scanner) error {
 	dist := options.GetB(OPT_DISTRIBUTION)
 	maxLines, err := parseMaxLines(options.GetS(OPT_MAX_LINES))
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return err
 	}
 
 	if dist {
@@ -297,6 +295,8 @@ func readData(s *bufio.Scanner) {
 	}
 
 	printResults()
+
+	return nil
 }
 
 // printProgress shows data processing progress
@@ -345,7 +345,7 @@ func printResults() {
 
 // printDistribution prints distribution info
 func printDistribution() {
-	var distData linesSlice
+	var distData []LineInfo
 
 	for crc, num := range stats.Counters {
 		distData = append(distData, LineInfo{crc, num})
@@ -353,7 +353,9 @@ func printDistribution() {
 
 	fmtc.TPrintf("")
 
-	sort.Sort(sort.Reverse(distData))
+	sort.Slice(distData, func(i, j int) bool {
+		return distData[i].Num > distData[j].Num
+	})
 
 	switch options.GetS(OPT_DISTRIBUTION) {
 	case "simple":
@@ -368,21 +370,21 @@ func printDistribution() {
 }
 
 // printDistributionDefault prints distribution info in default format
-func printDistributionDefault(data linesSlice) {
+func printDistributionDefault(data []LineInfo) {
 	for _, info := range data {
-		fmtc.Printf(" %7d %s\n", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn(" %7d %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
 // printDistributionSimple prints distribution info in simple format
-func printDistributionSimple(data linesSlice) {
+func printDistributionSimple(data []LineInfo) {
 	for _, info := range data {
-		fmtc.Printf("%d %s\n", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn("%d %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
 // printDistributionTable prints distribution info as a table
-func printDistributionTable(data linesSlice) {
+func printDistributionTable(data []LineInfo) {
 	t := table.NewTable("#", "DATA")
 
 	for _, info := range data {
@@ -393,7 +395,7 @@ func printDistributionTable(data linesSlice) {
 }
 
 // printDistributionTable prints distribution info in JSON format
-func printDistributionJSON(data linesSlice) {
+func printDistributionJSON(data []LineInfo) {
 	fmt.Println("[")
 
 	for index, info := range data {
@@ -463,12 +465,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
