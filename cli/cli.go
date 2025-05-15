@@ -124,7 +124,7 @@ var colorTagVer string
 
 // Run is main application function
 func Run(gitRev string, gomod []byte) {
-	runtime.GOMAXPROCS(1)
+	runtime.GOMAXPROCS(2)
 
 	preConfigureUI()
 
@@ -213,7 +213,11 @@ func processData(args options.Arguments) error {
 		mx:       &sync.Mutex{},
 	}
 
-	input := getInput(args)
+	input, err := getInput(args)
+
+	if err != nil {
+		return err
+	}
 
 	if input == "-" {
 		return readData(bufio.NewScanner(os.Stdin))
@@ -229,20 +233,19 @@ func processData(args options.Arguments) error {
 }
 
 // getInput returns input for reading data
-func getInput(args options.Arguments) string {
+func getInput(args options.Arguments) (string, error) {
 	if args.Get(0).String() == "-" || !fsutil.IsCharacterDevice("/dev/stdin") {
-		return "-"
+		return "-", nil
 	}
 
 	input := args.Get(0).Clean().String()
 	err := fsutil.ValidatePerms("FRS", input)
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return "", err
 	}
 
-	return input
+	return input, nil
 }
 
 // readData reads data from given source
