@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -18,24 +18,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fmtutil"
-	"github.com/essentialkaos/ek/v12/fmtutil/table"
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/mathutil"
-	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/signal"
-	"github.com/essentialkaos/ek/v12/strutil"
-	"github.com/essentialkaos/ek/v12/support"
-	"github.com/essentialkaos/ek/v12/support/deps"
-	"github.com/essentialkaos/ek/v12/terminal"
-	"github.com/essentialkaos/ek/v12/terminal/tty"
-	"github.com/essentialkaos/ek/v12/usage"
-	"github.com/essentialkaos/ek/v12/usage/completion/bash"
-	"github.com/essentialkaos/ek/v12/usage/completion/fish"
-	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
-	"github.com/essentialkaos/ek/v12/usage/man"
-	"github.com/essentialkaos/ek/v12/usage/update"
+	"github.com/essentialkaos/ek/v13/fmtc"
+	"github.com/essentialkaos/ek/v13/fmtutil"
+	"github.com/essentialkaos/ek/v13/fmtutil/table"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/mathutil"
+	"github.com/essentialkaos/ek/v13/options"
+	"github.com/essentialkaos/ek/v13/signal"
+	"github.com/essentialkaos/ek/v13/strutil"
+	"github.com/essentialkaos/ek/v13/support"
+	"github.com/essentialkaos/ek/v13/support/deps"
+	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v13/terminal/tty"
+	"github.com/essentialkaos/ek/v13/usage"
+	"github.com/essentialkaos/ek/v13/usage/completion/bash"
+	"github.com/essentialkaos/ek/v13/usage/completion/fish"
+	"github.com/essentialkaos/ek/v13/usage/completion/zsh"
+	"github.com/essentialkaos/ek/v13/usage/man"
+	"github.com/essentialkaos/ek/v13/usage/update"
 
 	"github.com/cespare/xxhash"
 )
@@ -45,7 +45,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.2"
+	VER  = "3.0.3"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -92,14 +92,6 @@ type LineInfo struct {
 	Num uint32
 }
 
-type linesSlice []LineInfo
-
-func (s linesSlice) Len() int      { return len(s) }
-func (s linesSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-func (s linesSlice) Less(i, j int) bool {
-	return s[i].Num < s[j].Num
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap is map with options
@@ -132,7 +124,7 @@ var colorTagVer string
 
 // Run is main application function
 func Run(gitRev string, gomod []byte) {
-	runtime.GOMAXPROCS(1)
+	runtime.GOMAXPROCS(2)
 
 	preConfigureUI()
 
@@ -140,7 +132,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.String())
+		terminal.Error(errs.Error(" - "))
 		os.Exit(1)
 	}
 
@@ -166,13 +158,14 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	signal.Handlers{
-		signal.INT:  signalHandler,
-		signal.TERM: signalHandler,
-		signal.QUIT: signalHandler,
-	}.TrackAsync()
+	registerSignalHandlers()
 
-	processData(args)
+	err := processData(args)
+
+	if err != nil {
+		terminal.Error(err)
+		os.Exit(1)
+	}
 }
 
 // preConfigureUI preconfigures UI based on information about user terminal
@@ -205,55 +198,63 @@ func configureUI() {
 	}
 }
 
+func registerSignalHandlers() {
+	signal.Handlers{
+		signal.INT:  signalHandler,
+		signal.TERM: signalHandler,
+		signal.QUIT: signalHandler,
+	}.TrackAsync()
+}
+
 // processData starts data processing
-func processData(args options.Arguments) {
+func processData(args options.Arguments) error {
 	stats = &Stats{
 		Counters: make(map[uint64]uint32),
 		mx:       &sync.Mutex{},
 	}
 
-	input := getInput(args)
+	input, err := getInput(args)
+
+	if err != nil {
+		return err
+	}
 
 	if input == "-" {
-		readData(bufio.NewScanner(os.Stdin))
-		return
+		return readData(bufio.NewScanner(os.Stdin))
 	}
 
 	fd, err := os.OpenFile(input, os.O_RDONLY, 0)
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return err
 	}
 
-	readData(bufio.NewScanner(fd))
+	return readData(bufio.NewScanner(fd))
 }
 
 // getInput returns input for reading data
-func getInput(args options.Arguments) string {
+func getInput(args options.Arguments) (string, error) {
 	if args.Get(0).String() == "-" || !fsutil.IsCharacterDevice("/dev/stdin") {
-		return "-"
+		return "-", nil
 	}
 
 	input := args.Get(0).Clean().String()
 	err := fsutil.ValidatePerms("FRS", input)
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return "", err
 	}
 
-	return input
+	return input, nil
 }
 
-// readData reads data
-func readData(s *bufio.Scanner) {
+// readData reads data from given source
+func readData(s *bufio.Scanner) error {
 	dist := options.GetB(OPT_DISTRIBUTION)
 	maxLines, err := parseMaxLines(options.GetS(OPT_MAX_LINES))
 
 	if err != nil {
-		terminal.Error(err)
-		os.Exit(1)
+		return err
 	}
 
 	if dist {
@@ -297,6 +298,8 @@ func readData(s *bufio.Scanner) {
 	}
 
 	printResults()
+
+	return nil
 }
 
 // printProgress shows data processing progress
@@ -345,7 +348,7 @@ func printResults() {
 
 // printDistribution prints distribution info
 func printDistribution() {
-	var distData linesSlice
+	var distData []LineInfo
 
 	for crc, num := range stats.Counters {
 		distData = append(distData, LineInfo{crc, num})
@@ -353,7 +356,9 @@ func printDistribution() {
 
 	fmtc.TPrintf("")
 
-	sort.Sort(sort.Reverse(distData))
+	sort.Slice(distData, func(i, j int) bool {
+		return distData[i].Num > distData[j].Num
+	})
 
 	switch options.GetS(OPT_DISTRIBUTION) {
 	case "simple":
@@ -368,21 +373,21 @@ func printDistribution() {
 }
 
 // printDistributionDefault prints distribution info in default format
-func printDistributionDefault(data linesSlice) {
+func printDistributionDefault(data []LineInfo) {
 	for _, info := range data {
-		fmtc.Printf(" %7d %s\n", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn(" %7d %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
 // printDistributionSimple prints distribution info in simple format
-func printDistributionSimple(data linesSlice) {
+func printDistributionSimple(data []LineInfo) {
 	for _, info := range data {
-		fmtc.Printf("%d %s\n", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn("%d %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
 // printDistributionTable prints distribution info as a table
-func printDistributionTable(data linesSlice) {
+func printDistributionTable(data []LineInfo) {
 	t := table.NewTable("#", "DATA")
 
 	for _, info := range data {
@@ -393,7 +398,7 @@ func printDistributionTable(data linesSlice) {
 }
 
 // printDistributionTable prints distribution info in JSON format
-func printDistributionJSON(data linesSlice) {
+func printDistributionJSON(data []LineInfo) {
 	fmt.Println("[")
 
 	for index, info := range data {
@@ -463,17 +468,12 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
 func genUsage() *usage.Info {
-	info := usage.NewInfo(APP, "file")
+	info := usage.NewInfo("", "?file")
 
 	info.AppNameColorTag = colorTagApp
 

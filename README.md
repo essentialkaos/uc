@@ -2,8 +2,6 @@
 
 <p align="center">
   <a href="https://kaos.sh/r/uc"><img src="https://kaos.sh/r/uc.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/l/uc"><img src="https://kaos.sh/l/29edb01c21de207a27ed.svg" alt="Code Climate Maintainability" /></a>
-  <a href="https://kaos.sh/b/uc"><img src="https://kaos.sh/b/fd8a50fa-575c-47ba-8c67-1dd2f3b437f7.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/uc/ci"><img src="https://kaos.sh/w/uc/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/uc/codeql"><img src="https://kaos.sh/w/uc/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
@@ -17,7 +15,7 @@
 
 ### Usage demo
 
-[![demo](https://gh.kaos.st/uc-110.gif)](#usage-demo)
+[![demo](https://github.com/user-attachments/assets/24bd2d94-cdcd-41b7-b3d4-f9ac7b0b239e)](#usage-demo)
 
 ### Benchmarks
 
@@ -43,7 +41,7 @@ Summary
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go 1.20+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go [1.23+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/uc@latest
@@ -52,8 +50,8 @@ go install github.com/essentialkaos/uc@latest
 #### From [ESSENTIAL KAOS Public Repository](https://pkgs.kaos.st)
 
 ```bash
-sudo yum install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
-sudo yum install uc
+sudo dnf install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
+sudo dnf install uc
 ```
 
 #### Prebuilt binaries
@@ -108,10 +106,10 @@ uc --generate-man | sudo gzip > /usr/share/man/man1/uc.1.gz
 
 ### Contributing
 
-Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/contributing-guidelines#contributing-guidelines).
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
 
 ### License
 
 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
+<p align="center"><a href="https://kaos.dev"><img src="https://raw.githubusercontent.com/essentialkaos/.github/refs/heads/master/images/ekgh.svg"/></a></p>
