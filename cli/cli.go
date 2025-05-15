@@ -470,7 +470,7 @@ func printMan() {
 
 // genUsage generates usage info
 func genUsage() *usage.Info {
-	info := usage.NewInfo(APP, "file")
+	info := usage.NewInfo("", "?file")
 
 	info.AppNameColorTag = colorTagApp
 
