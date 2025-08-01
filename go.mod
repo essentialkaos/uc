@@ -1,10 +1,10 @@
 module github.com/essentialkaos/uc
 
-go 1.23.6
+go 1.23.10
 
 require (
 	github.com/cespare/xxhash v1.1.0
-	github.com/essentialkaos/ek/v13 v13.31.3
+	github.com/essentialkaos/ek/v13 v13.32.0
 )
 
 require (
