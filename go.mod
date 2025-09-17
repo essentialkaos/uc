@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/cespare/xxhash v1.1.0
-	github.com/essentialkaos/ek/v13 v13.34.0
+	github.com/essentialkaos/ek/v13 v13.34.1
 )
 
 require (
