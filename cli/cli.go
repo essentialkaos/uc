@@ -44,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.1.0"
+	VER  = "3.1.1"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -154,6 +154,8 @@ func Run(gitRev string, gomod []byte) {
 			WithDeps(deps.Extract(gomod)).
 			Print()
 		os.Exit(0)
+	case withSelfUpdate && options.GetB(OPT_UPDATE):
+		os.Exit(updateBinary())
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
 		os.Exit(0)
