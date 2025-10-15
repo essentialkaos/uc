@@ -6,7 +6,7 @@
 
 Summary:        Simple utility for counting unique lines
 Name:           uc
-Version:        3.1.0
+Version:        3.1.1
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache License, Version 2.0
@@ -96,6 +96,9 @@ fi
 ################################################################################
 
 %changelog
+* Wed Oct 15 2025 Anton Novojilov <andy@essentialkaos.com> - 3.1.1-0
+- Fixed bug with handling self-update option
+
 * Wed Oct 15 2025 Anton Novojilov <andy@essentialkaos.com> - 3.1.0-0
 - Code refactoring
 - Dependencies update
