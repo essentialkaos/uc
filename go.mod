@@ -1,6 +1,6 @@
 module github.com/essentialkaos/uc
 
-go 1.24.0
+go 1.24.6
 
 require (
 	github.com/cespare/xxhash v1.1.0
