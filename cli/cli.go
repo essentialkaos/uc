@@ -22,7 +22,6 @@ import (
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fmtutil/table"
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/mathutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/signal"
 	"github.com/essentialkaos/ek/v13/strutil"
@@ -45,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.3"
+	VER  = "3.1.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -58,6 +57,7 @@ const (
 	OPT_HELP         = "h:help"
 	OPT_VER          = "v:version"
 
+	OPT_UPDATE       = "U:update"
 	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
@@ -127,6 +127,7 @@ func Run(gitRev string, gomod []byte) {
 	runtime.GOMAXPROCS(2)
 
 	preConfigureUI()
+	preConfigureOptions()
 
 	args, errs := options.Parse(optMap)
 
@@ -178,6 +179,11 @@ func preConfigureUI() {
 	table.FullScreen = false
 	table.HeaderCapitalize = true
 	table.BorderSymbol = "–"
+}
+
+// preConfigureOptions preconfigures command-line options based on build tags
+func preConfigureOptions() {
+	optMap.SetIf(withSelfUpdate, OPT_UPDATE, &options.V{Type: options.MIXED})
 }
 
 // configureUI configures user interface
@@ -285,7 +291,7 @@ func readData(s *bufio.Scanner) error {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = data[:mathutil.Min(len(data), MAX_SAMPLE_SIZE)]
+				stats.Samples[dataCrc] = data[:min(len(data), MAX_SAMPLE_SIZE)]
 			}
 		}
 
@@ -481,6 +487,11 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
+
+	if withSelfUpdate {
+		info.AddOption(OPT_UPDATE, "Update application to the latest version")
+	}
+
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 

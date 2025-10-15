@@ -41,7 +41,7 @@ Summary
 
 #### From sources
 
-To build the `uc` from scratch, make sure you have a working Go [1.23+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `uc` from scratch, make sure you have a working Go [1.24+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/uc@latest
@@ -64,25 +64,40 @@ To install the latest prebuilt version, do:
 bash <(curl -fsSL https://apps.kaos.st/get) uc
 ```
 
+### Upgrading
+
+Since version `3.1.0` you can update `uc` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
+
+```bash
+uc --update
+```
+
+This command will runs a self-update in interactive mode. If you want to run a quiet update (_no output_), use the following command:
+
+```bash
+uc --update=quiet
+```
+
+> [!NOTE]
+> Please note that the self-update feature only works with binaries that are downloaded from the [EK Apps Repository](https://apps.kaos.st/uc/latest). Binaries from packages do not have a self-update feature and must be upgraded via the package manager.
+
 ### Command-line completion
 
 You can generate completion for `bash`, `zsh` or `fish` shell.
 
 Bash:
 ```bash
-sudo uc --completion=bash 1> /etc/bash_completion.d/uc
+uc --completion=bash | sudo tee /etc/bash_completion.d/uc > /dev/null
 ```
-
 
 ZSH:
 ```bash
-sudo uc --completion=zsh 1> /usr/share/zsh/site-functions/uc
+uc --completion=zsh | sudo tee /usr/share/zsh/site-functions/uc > /dev/null
 ```
-
 
 Fish:
 ```bash
-sudo uc --completion=fish 1> /usr/share/fish/vendor_completions.d/uc.fish
+uc --completion=fish | sudo tee /usr/share/fish/vendor_completions.d/uc.fish > /dev/null
 ```
 
 ### Man documentation
