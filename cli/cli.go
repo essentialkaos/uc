@@ -22,7 +22,6 @@ import (
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fmtutil/table"
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/mathutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/signal"
 	"github.com/essentialkaos/ek/v13/strutil"
@@ -45,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.0.3"
+	VER  = "3.0.4"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -285,7 +284,7 @@ func readData(s *bufio.Scanner) error {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = data[:mathutil.Min(len(data), MAX_SAMPLE_SIZE)]
+				stats.Samples[dataCrc] = data[:min(len(data), MAX_SAMPLE_SIZE)]
 			}
 		}
 
