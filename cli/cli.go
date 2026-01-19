@@ -44,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.1.2"
+	VER  = "3.2.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -376,14 +376,21 @@ func printDistribution() {
 	case "json", "j":
 		printDistributionJSON(distData)
 	default:
-		printDistributionDefault(distData)
+		if rawMode {
+			printDistributionSimple(distData)
+		} else {
+			printDistributionDefault(distData)
+		}
 	}
 }
 
 // printDistributionDefault prints distribution info in default format
 func printDistributionDefault(data []LineInfo) {
+	maxNumSize := len(fmt.Sprintf("%d", data[0].Num))
+	sizeFmt := fmt.Sprintf("%%%dd", maxNumSize)
+
 	for _, info := range data {
-		fmtc.Printfn(" %7d %s", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn(" {s}"+sizeFmt+"{!} %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
