@@ -6,7 +6,7 @@
 
 Summary:        Simple utility for counting unique lines
 Name:           uc
-Version:        3.1.1
+Version:        3.2.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache License, Version 2.0
@@ -96,6 +96,14 @@ fi
 ################################################################################
 
 %changelog
+* Mon Jan 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
+- Fixed bug with copying data samples for distribution calculation
+- Improved handling distribution output format option
+- Improved distribution info formatting
+- Added support of 'B' multiplier
+- Code refactoring
+- Dependencies update
+
 * Wed Oct 15 2025 Anton Novojilov <andy@essentialkaos.com> - 3.1.1-0
 - Fixed bug with handling self-update option
 

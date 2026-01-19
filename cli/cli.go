@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2026 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -44,7 +44,7 @@ import (
 // Application basic info
 const (
 	APP  = "uc"
-	VER  = "3.1.1"
+	VER  = "3.2.0"
 	DESC = "Tool for counting unique lines"
 )
 
@@ -293,7 +293,7 @@ func readData(s *bufio.Scanner) error {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = data[:min(len(data), MAX_SAMPLE_SIZE)]
+				stats.Samples[dataCrc] = append([]byte(nil), data[:min(len(data), MAX_SAMPLE_SIZE)]...)
 			}
 		}
 
@@ -368,22 +368,29 @@ func printDistribution() {
 		return distData[i].Num > distData[j].Num
 	})
 
-	switch options.GetS(OPT_DISTRIBUTION) {
-	case "simple":
+	switch strings.ToLower(options.GetS(OPT_DISTRIBUTION)) {
+	case "simple", "s":
 		printDistributionSimple(distData)
-	case "table":
+	case "table", "t":
 		printDistributionTable(distData)
-	case "json":
+	case "json", "j":
 		printDistributionJSON(distData)
 	default:
-		printDistributionDefault(distData)
+		if rawMode {
+			printDistributionSimple(distData)
+		} else {
+			printDistributionDefault(distData)
+		}
 	}
 }
 
 // printDistributionDefault prints distribution info in default format
 func printDistributionDefault(data []LineInfo) {
+	maxNumSize := len(fmt.Sprintf("%d", data[0].Num))
+	sizeFmt := fmt.Sprintf("%%%dd", maxNumSize)
+
 	for _, info := range data {
-		fmtc.Printfn(" %7d %s", info.Num, string(stats.Samples[info.CRC]))
+		fmtc.Printfn(" {s}"+sizeFmt+"{!} %s", info.Num, string(stats.Samples[info.CRC]))
 	}
 }
 
@@ -437,8 +444,11 @@ func parseMaxLines(maxLines string) (int, error) {
 		maxLines = strutil.Exclude(maxLines, "K")
 		mp = 1000
 	case strings.HasSuffix(maxLines, "M"):
-		mp = 1000 * 1000
+		mp = 1_000_1000
 		maxLines = strutil.Exclude(maxLines, "M")
+	case strings.HasSuffix(maxLines, "B"):
+		mp = 1_000_000_000
+		maxLines = strutil.Exclude(maxLines, "B")
 	}
 
 	num, err := strconv.Atoi(maxLines)
@@ -485,8 +495,8 @@ func genUsage() *usage.Info {
 
 	info.AppNameColorTag = colorTagApp
 
-	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/simple/table/json){!}", "?format")
-	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
+	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/{_}s{!_}imple/{_}t{!_}able/{_}j{!_}son){!}", "?format")
+	info.AddOption(OPT_MAX_LINES, "Max number of unique lines {s-}(k/m/b multipliers is supported){!}", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 
@@ -500,12 +510,17 @@ func genUsage() *usage.Info {
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddExample("--dist=table file.txt", "Show distribution as a table for file.txt")
-	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
+	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 unique lines max")
 
 	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 	info.AddRawExample(
 		APP+" -m 100 < file.txt",
-		"Count unique lines in stdin data with 100 uniq lines max",
+		"Count unique lines in stdin data with 100 unique lines max",
+	)
+
+	info.AddRawExample(
+		"grep 'OK' file.log | "+APP,
+		"Count unique lines in stdin data",
 	)
 
 	return info
