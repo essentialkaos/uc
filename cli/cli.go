@@ -444,8 +444,11 @@ func parseMaxLines(maxLines string) (int, error) {
 		maxLines = strutil.Exclude(maxLines, "K")
 		mp = 1000
 	case strings.HasSuffix(maxLines, "M"):
-		mp = 1000 * 1000
+		mp = 1_000_1000
 		maxLines = strutil.Exclude(maxLines, "M")
+	case strings.HasSuffix(maxLines, "B"):
+		mp = 1_000_000_000
+		maxLines = strutil.Exclude(maxLines, "B")
 	}
 
 	num, err := strconv.Atoi(maxLines)
@@ -493,7 +496,7 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = colorTagApp
 
 	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/{_}s{!_}imple/{_}t{!_}able/{_}j{!_}son){!}", "?format")
-	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
+	info.AddOption(OPT_MAX_LINES, "Max number of unique lines {s-}(k/m/b multipliers is supported){!}", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 
@@ -507,12 +510,17 @@ func genUsage() *usage.Info {
 	info.AddExample("file.txt", "Count unique lines in file.txt")
 	info.AddExample("-d file.txt", "Show distribution for file.txt")
 	info.AddExample("--dist=table file.txt", "Show distribution as a table for file.txt")
-	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 uniq lines max")
+	info.AddExample("-d -m 5k file.txt", "Show distribution for file.txt with 5,000 unique lines max")
 
 	info.AddRawExample("cat file.txt | "+APP, "Count unique lines in stdin data")
 	info.AddRawExample(
 		APP+" -m 100 < file.txt",
-		"Count unique lines in stdin data with 100 uniq lines max",
+		"Count unique lines in stdin data with 100 unique lines max",
+	)
+
+	info.AddRawExample(
+		"grep 'OK' file.log | "+APP,
+		"Count unique lines in stdin data",
 	)
 
 	return info
