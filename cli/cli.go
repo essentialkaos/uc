@@ -293,7 +293,7 @@ func readData(s *bufio.Scanner) error {
 			_, exist := stats.Samples[dataCrc]
 
 			if !exist {
-				stats.Samples[dataCrc] = data[:min(len(data), MAX_SAMPLE_SIZE)]
+				stats.Samples[dataCrc] = append([]byte(nil), data[:min(len(data), MAX_SAMPLE_SIZE)]...)
 			}
 		}
 
