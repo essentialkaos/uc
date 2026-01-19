@@ -368,12 +368,12 @@ func printDistribution() {
 		return distData[i].Num > distData[j].Num
 	})
 
-	switch options.GetS(OPT_DISTRIBUTION) {
-	case "simple":
+	switch strings.ToLower(options.GetS(OPT_DISTRIBUTION)) {
+	case "simple", "s":
 		printDistributionSimple(distData)
-	case "table":
+	case "table", "t":
 		printDistributionTable(distData)
-	case "json":
+	case "json", "j":
 		printDistributionJSON(distData)
 	default:
 		printDistributionDefault(distData)
@@ -485,7 +485,7 @@ func genUsage() *usage.Info {
 
 	info.AppNameColorTag = colorTagApp
 
-	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/simple/table/json){!}", "?format")
+	info.AddOption(OPT_DISTRIBUTION, "Show number of occurrences for every line {s-}(-/{_}s{!_}imple/{_}t{!_}able/{_}j{!_}son){!}", "?format")
 	info.AddOption(OPT_MAX_LINES, "Max number of unique lines", "num")
 	info.AddOption(OPT_NO_PROGRESS, "Disable progress output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
