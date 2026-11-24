@@ -6,7 +6,7 @@
 
 Summary:        Simple utility for counting unique lines
 Name:           uc
-Version:        3.2.0
+Version:        3.3.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache License, Version 2.0
@@ -16,7 +16,7 @@ Source0:        https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.24
+BuildRequires:  golang >= 1.26
 
 Provides:       %{name} = %{version}-%{release}
 
@@ -96,6 +96,9 @@ fi
 ################################################################################
 
 %changelog
+* Tue Nov 24 2026 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
+- Migrated to ek.v14
+
 * Mon Jan 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
 - Fixed bug with copying data samples for distribution calculation
 - Improved handling distribution output format option
