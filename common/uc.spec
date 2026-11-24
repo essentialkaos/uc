@@ -96,7 +96,7 @@ fi
 ################################################################################
 
 %changelog
-* Thu Nov 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
+* Tue Nov 24 2026 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
 - Migrated to ek.v14
 
 * Mon Jan 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
